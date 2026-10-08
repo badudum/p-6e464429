@@ -28,7 +28,10 @@ h1 { font: 800 2rem/1.1 "Bricolage Grotesque", system-ui, sans-serif; margin: 0;
 .amt { font: 800 3.2rem/1 "Bricolage Grotesque", system-ui, sans-serif; font-variant-numeric: tabular-nums; }
 .amt-l { color: var(--muted); font-size: .9rem; margin-top: -10px; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 14px; }
-.em { font: 500 1.2rem "IBM Plex Mono", ui-monospace, monospace; overflow-wrap: anywhere; user-select: all; -webkit-user-select: all; }
+.hint { margin: 0; font-weight: 700; font-size: 1.25rem; line-height: 1.3; color: var(--ink); text-wrap: balance; }
+.em { font: 500 1.4rem "IBM Plex Mono", ui-monospace, monospace; overflow-wrap: anywhere; user-select: all; -webkit-user-select: all;
+  cursor: pointer; padding: 10px; border: 1px dashed var(--line); border-radius: 10px; }
+.em:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 button { font: inherit; font-weight: 700; font-size: 1.15rem; border: 0; border-radius: 12px; padding: 16px; cursor: pointer;
   background: var(--accent); color: var(--accent-ink); width: 100%; }
 button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
@@ -54,12 +57,13 @@ h2 { font: 800 1.15rem "Bricolage Grotesque", system-ui, sans-serif; margin: 0; 
   <h1>Pay by Interac e-Transfer</h1>
   <div id="amt-wrap" hidden><div class="amt" id="amt"></div><div class="amt-l">your total</div></div>
   <div class="card">
-    <div class="em" id="em">akcse2026@gmail.com</div>
+    <p class="hint" id="copy-hint">Tap the email or the button to copy it.</p>
+    <div class="em" id="em" role="button" tabindex="0" aria-label="Copy email akcse2026@gmail.com">akcse2026@gmail.com</div>
     <button id="copy" type="button">Copy email</button>
   </div>
   <section id="bank-sec" class="card" hidden>
     <h2>Open your bank app</h2>
-    <p class="muted" id="bank-note">Tapping a bank also copies the email.</p>
+    <p class="hint" id="bank-note" style="font-size:1.05rem">Tapping your bank copies the email, then opens the app.</p>
     <div class="banks" id="banks-top"></div>
     <details><summary>More banks</summary><div class="banks" id="banks-more"></div></details>
   </section>
@@ -98,7 +102,7 @@ h2 { font: 800 1.15rem "Bricolage Grotesque", system-ui, sans-serif; margin: 0; 
     const link = ([name, url], i) => url ? `<a href="${url}" data-bank="${i}">${name}</a>` : `<a href="#" data-bank="${i}">${name}</a>`;
     document.getElementById("banks-top").innerHTML = BANKS.slice(0, 6).map((b, i) => link(b, i)).join("");
     document.getElementById("banks-more").innerHTML = BANKS.slice(6).map((b, i) => link(b, i + 6)).join("");
-    document.getElementById("bank-note").textContent = "Tap your bank to copy the email and open its app.";
+    document.getElementById("bank-note").textContent = "Tapping your bank copies the email, then opens the app.";
     document.getElementById("bank-sec").hidden = false;
   }
   if (isFinite(amt) && amt > 0 && amt < 10000) {
@@ -107,7 +111,7 @@ h2 { font: 800 1.15rem "Bricolage Grotesque", system-ui, sans-serif; margin: 0; 
     document.getElementById("amt-inline").textContent = s;
     document.getElementById("amt-wrap").hidden = false;
   }
-  function done() { btn.textContent = "Copied ✓ Now open your bank app"; btn.classList.add("done"); }
+  function done() { btn.textContent = "Copied ✓ Now open your bank app"; btn.classList.add("done"); document.getElementById("copy-hint").textContent = "Email copied. Paste it into your bank app."; }
   function legacyCopy() {
     const t = document.createElement("textarea");
     t.value = EMAIL; t.setAttribute("readonly", ""); t.style.position = "fixed"; t.style.opacity = "0";
@@ -116,11 +120,15 @@ h2 { font: 800 1.15rem "Bricolage Grotesque", system-ui, sans-serif; margin: 0; 
     t.remove(); return ok;
   }
   function selectEmail() { const r = document.createRange(); r.selectNodeContents(document.getElementById("em")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
-  btn.addEventListener("click", async () => {
+  const copyNow = async () => {
     try { await navigator.clipboard.writeText(EMAIL); done(); return; } catch {}
     if (legacyCopy()) { done(); return; }
     selectEmail(); btn.textContent = "Press and hold the email to copy";
-  });
+  };
+  btn.addEventListener("click", copyNow);
+  const emEl = document.getElementById("em");
+  emEl.addEventListener("click", copyNow);
+  emEl.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); copyNow(); } });
   document.addEventListener("click", e => {
     const a = e.target.closest("a[data-bank]"); if (!a) return;
     const [name, url] = BANKS[+a.dataset.bank];
