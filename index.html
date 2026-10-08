@@ -79,18 +79,26 @@ h2 { font: 800 1.15rem "Bricolage Grotesque", system-ui, sans-serif; margin: 0; 
   // Links each bank's app has claimed (apple-app-site-association / assetlinks.json on the bank's own site),
   // so the phone opens the app when it's installed. Banks without one only get the email copied.
   const BANKS = [
-    ["RBC", "https://mobile.rbcroyalbank.com/"], ["TD", "https://www.td.com/ul/mb/home"], ["CIBC", null],
-    ["Scotiabank", null], ["BMO", null], ["Tangerine", "https://www.tangerine.ca/deeplink"],
-    ["KOHO", "https://app.koho.ca/link"], ["Wealthsimple", null], ["Vancity", null], ["Coast Capital", null],
-    ["National Bank", null], ["Desjardins", null], ["EQ Bank", null],
+    ["RBC", "https://mobile.rbcroyalbank.com/"],
+    ["TD", "https://www.td.com/ul/mb/home"],
+    ["CIBC", "https://www.cibconline.cibc.com/ebm-resources/online-banking/client/index.html"],
+    ["Scotiabank", "https://auth.scotiaonline.scotiabank.com/api/nova/sso"],
+    ["BMO", "https://www1.bmo.com/launch-app"],
+    ["Tangerine", "https://www.tangerine.ca/deeplink"],
+    ["Simplii", "https://online.simplii.com/ebm-resources/public/client/web/index.html"],
+    ["EQ Bank", "https://secure.eqbank.ca/pay-and-transfer/interac/send"],
+    ["National Bank", "https://app.bnc.ca/offers"],
+    ["KOHO", "https://app.koho.ca/link"],
+    ["Wealthsimple", null], ["Vancity", null], ["Coast Capital", null], ["Desjardins", null],
   ];
+
   const ua = navigator.userAgent;
   const mobile = /Android|iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   if (mobile) {
     const link = ([name, url], i) => url ? `<a href="${url}" data-bank="${i}">${name}</a>` : `<a href="#" data-bank="${i}">${name}</a>`;
     document.getElementById("banks-top").innerHTML = BANKS.slice(0, 6).map((b, i) => link(b, i)).join("");
     document.getElementById("banks-more").innerHTML = BANKS.slice(6).map((b, i) => link(b, i + 6)).join("");
-    document.getElementById("bank-note").textContent = "Tap your bank to copy the email. RBC, TD, Tangerine and KOHO open the app too.";
+    document.getElementById("bank-note").textContent = "Tap your bank to copy the email and open its app.";
     document.getElementById("bank-sec").hidden = false;
   }
   if (isFinite(amt) && amt > 0 && amt < 10000) {
