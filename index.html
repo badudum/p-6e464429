@@ -35,6 +35,14 @@ button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 button.done { background: var(--good-soft); color: var(--good); }
 ol { text-align: left; margin: 0; padding-left: 22px; display: grid; gap: 6px; }
 .muted { color: var(--muted); font-size: .9rem; margin: 0; }
+.banks { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); }
+.banks a { display: block; padding: 12px 8px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
+  color: var(--ink); text-decoration: none; font-weight: 700; }
+.banks a:active { transform: scale(.97); }
+.banks a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+details summary { cursor: pointer; color: var(--muted); font-weight: 700; padding: 6px; }
+details[open] summary { margin-bottom: 8px; }
+h2 { font: 800 1.15rem "Bricolage Grotesque", system-ui, sans-serif; margin: 0; }
 </style>
 </head>
 <body>
@@ -49,6 +57,12 @@ ol { text-align: left; margin: 0; padding-left: 22px; display: grid; gap: 6px; }
     <div class="em" id="em">akcse2026@gmail.com</div>
     <button id="copy" type="button">Copy email</button>
   </div>
+  <section id="bank-sec" class="card" hidden>
+    <h2>Open your bank app</h2>
+    <p class="muted" id="bank-note">Tapping a bank also copies the email.</p>
+    <div class="banks" id="banks-top"></div>
+    <details><summary>More banks</summary><div class="banks" id="banks-more"></div></details>
+  </section>
   <ol>
     <li>Open your bank app and choose <b>Interac e-Transfer</b>.</li>
     <li>Add a new contact and paste the email.</li>
@@ -62,6 +76,32 @@ ol { text-align: left; margin: 0; padding-left: 22px; display: grid; gap: 6px; }
   const btn = document.getElementById("copy");
   const p = new URLSearchParams(location.search);
   const amt = parseFloat(p.get("amt"));
+  // App ids checked against the Google Play and Apple App Store (Canada) listings.
+  const BANKS = [
+    ["RBC", "com.rbc.mobile.android", 407597290], ["TD", "com.td", 358790776], ["CIBC", "com.cibc.android.mobi", 351448953],
+    ["Scotiabank", "com.scotiabank.banking", 341151570], ["BMO", "com.bmo.mobile", 429080319],
+    ["Tangerine", "ca.tangerine.clients.banking.app", 847844097], ["Wealthsimple", "com.wealthsimple.trade", 1403491709],
+    ["Vancity", "com.vancity.digital.banking", 6747142162], ["Coast Capital", "com.coastcapitalsavings.dcu", 1466597953],
+    ["National Bank", "ca.bnc.android", 476651878], ["Desjardins", "com.desjardins.mobile", 386636953],
+    ["EQ Bank", "com.eqbank.eqbank", 1039432211], ["KOHO", "ca.koho", 1091010942],
+  ];
+  const ua = navigator.userAgent;
+  const android = /Android/i.test(ua);
+  const ios = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const bankUrl = ([, pkg, appleId]) => {
+    if (android) {
+      const store = "https://play.google.com/store/apps/details?id=" + pkg;
+      return `intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=${pkg};S.browser_fallback_url=${encodeURIComponent(store)};end`;
+    }
+    return "https://apps.apple.com/ca/app/id" + appleId;
+  };
+  if (android || ios) {
+    const link = b => `<a href="${bankUrl(b)}" data-bank>${b[0]}</a>`;
+    document.getElementById("banks-top").innerHTML = BANKS.slice(0, 6).map(link).join("");
+    document.getElementById("banks-more").innerHTML = BANKS.slice(6).map(link).join("");
+    if (ios) document.getElementById("bank-note").textContent = "Tapping a bank copies the email and opens its App Store page. Tap Open there.";
+    document.getElementById("bank-sec").hidden = false;
+  }
   if (isFinite(amt) && amt > 0 && amt < 10000) {
     const s = "$" + amt.toFixed(2);
     document.getElementById("amt").textContent = s;
@@ -81,6 +121,12 @@ ol { text-align: left; margin: 0; padding-left: 22px; display: grid; gap: 6px; }
     try { await navigator.clipboard.writeText(EMAIL); done(); return; } catch {}
     if (legacyCopy()) { done(); return; }
     selectEmail(); btn.textContent = "Press and hold the email to copy";
+  });
+  document.addEventListener("click", async e => {
+    const a = e.target.closest("a[data-bank]"); if (!a) return;
+    e.preventDefault();
+    try { await navigator.clipboard.writeText(EMAIL); done(); } catch { if (legacyCopy()) done(); }
+    location.href = a.href;
   });
   // Some browsers (mostly Android Chrome) allow copying right away; the rest need the tap.
   if (navigator.clipboard && document.hasFocus()) navigator.clipboard.writeText(EMAIL).then(done, () => {});
