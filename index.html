@@ -7,53 +7,48 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
+/* Monochrome to match the black-on-white AKCSE UBC logo; deliberately one light theme so the logo always reads. */
 :root {
-  --bg: #FBF6F8; --surface: #FFFFFF; --line: #E7DAE1; --ink: #2B1A2B; --muted: #76606F;
-  --accent: #C23B6E; --accent-ink: #FFFFFF; --good: #2C7A4B; --good-soft: #DDF1E4; --dough: #D9A066;
+  --bg: #FFFFFF; --surface: #FFFFFF; --sunk: #F4F4F4; --line: #DADADA; --ink: #000000; --muted: #5E5E5E;
+  --accent: #000000; --accent-ink: #FFFFFF; --good: #1F6B3E; --good-soft: #E3F2E8;
   color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root { --bg: #18111A; --surface: #231925; --line: #3A2B3B; --ink: #F5EAF1; --muted: #B59EAF;
-    --accent: #F06C9E; --accent-ink: #1A0F16; --good: #72D49C; --good-soft: #183528; --dough: #B8834F; color-scheme: dark; }
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; }
-body { background: var(--bg); color: var(--ink); font: 17px/1.45 "Atkinson Hyperlegible", system-ui, sans-serif;
-  padding: calc(28px + env(safe-area-inset-top, 0px)) 16px calc(28px + env(safe-area-inset-bottom, 0px)); }
+body { background: var(--bg); color: var(--ink); font: 17px/1.45 Archivo, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  padding: calc(24px + env(safe-area-inset-top, 0px)) 16px calc(28px + env(safe-area-inset-bottom, 0px)); }
 main { max-width: 440px; margin: 0 auto; display: grid; gap: 18px; text-align: center; }
-.brand { display: flex; gap: 10px; align-items: center; justify-content: center; font-weight: 700; color: var(--muted); }
-h1 { font: 800 2rem/1.1 "Bricolage Grotesque", system-ui, sans-serif; margin: 0; text-wrap: balance; }
-.amt { font: 800 3.2rem/1 "Bricolage Grotesque", system-ui, sans-serif; font-variant-numeric: tabular-nums; }
-.amt-l { color: var(--muted); font-size: .9rem; margin-top: -10px; }
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 14px; }
-.hint { margin: 0; font-weight: 700; font-size: 1.25rem; line-height: 1.3; color: var(--ink); text-wrap: balance; }
+.brand { display: flex; justify-content: center; }
+.brand img { width: 112px; height: auto; display: block; }
+h1 { font: 800 2rem/1.05 Archivo, "Helvetica Neue", Helvetica, Arial, sans-serif; letter-spacing: -.03em; margin: 0; text-wrap: balance; }
+.amt { font: 800 3.4rem/1 Archivo, "Helvetica Neue", Helvetica, Arial, sans-serif; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.amt-l { color: var(--muted); font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; margin-top: -8px; }
+.card { background: var(--surface); border: 2px solid var(--ink); border-radius: 4px; padding: 18px; display: grid; gap: 14px; }
+.hint { margin: 0; font-weight: 600; font-size: 1.25rem; line-height: 1.3; color: var(--ink); text-wrap: balance; }
 .em { font: 500 1.4rem "IBM Plex Mono", ui-monospace, monospace; overflow-wrap: anywhere; user-select: all; -webkit-user-select: all;
-  cursor: pointer; padding: 10px; border: 1px dashed var(--line); border-radius: 10px; }
-.em:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-button { font: inherit; font-weight: 700; font-size: 1.15rem; border: 0; border-radius: 12px; padding: 16px; cursor: pointer;
+  cursor: pointer; padding: 10px; background: var(--sunk); border: 1px dashed var(--line); border-radius: 4px; }
+.em:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+button { font: inherit; font-weight: 800; font-size: 1.15rem; letter-spacing: .01em; border: 2px solid var(--accent); border-radius: 4px; padding: 16px; cursor: pointer;
   background: var(--accent); color: var(--accent-ink); width: 100%; }
 button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
-button.done { background: var(--good-soft); color: var(--good); }
+button.done { background: var(--good-soft); color: var(--good); border-color: var(--good); }
 ol { text-align: left; margin: 0; padding-left: 22px; display: grid; gap: 6px; }
 .muted { color: var(--muted); font-size: .9rem; margin: 0; }
 .banks { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); }
-.banks a { display: block; padding: 12px 8px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
-  color: var(--ink); text-decoration: none; font-weight: 700; }
-.banks a:active { transform: scale(.97); }
-.banks a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-details summary { cursor: pointer; color: var(--muted); font-weight: 700; padding: 6px; }
+.banks a { display: block; padding: 12px 8px; border: 1px solid var(--ink); border-radius: 4px; background: var(--surface);
+  color: var(--ink); text-decoration: none; font-weight: 600; }
+.banks a:active { background: var(--ink); color: var(--accent-ink); }
+.banks a:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+details summary { cursor: pointer; color: var(--muted); font-weight: 600; padding: 6px; }
 details[open] summary { margin-bottom: 8px; }
-h2 { font: 800 1.15rem "Bricolage Grotesque", system-ui, sans-serif; margin: 0; }
+h2 { font: 800 1.15rem Archivo, "Helvetica Neue", Helvetica, Arial, sans-serif; letter-spacing: -.01em; margin: 0; }
 </style>
 </head>
 <body>
 <main>
-  <div class="brand">
-    <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="12" fill="none" stroke="var(--dough)" stroke-width="13"/><circle cx="20" cy="20" r="12" fill="none" stroke="var(--accent)" stroke-width="9"/></svg>
-    AKCSE
-  </div>
+  <div class="brand"><img src="logo.png" width="272" height="221" alt="AKCSE UBC"></div>
   <h1>Pay by Interac e-Transfer</h1>
   <div id="amt-wrap" hidden><div class="amt" id="amt"></div><div class="amt-l">your total</div></div>
   <div class="card">
