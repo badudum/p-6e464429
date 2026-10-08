@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bank link test</title>
+<meta name="robots" content="noindex">
+<style>
+:root { --bg: #FFFFFF; --ink: #000000; --muted: #5E5E5E; --line: #DADADA; color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.45 "Helvetica Neue", Helvetica, Arial, sans-serif;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) 16px calc(28px + env(safe-area-inset-bottom, 0px)); }
+main { max-width: 480px; margin: 0 auto; display: grid; gap: 18px; }
+h1 { font-size: 1.6rem; margin: 0; letter-spacing: -.02em; }
+h2 { font-size: 1.2rem; margin: 0; }
+p, ol { margin: 0; }
+ol { padding-left: 22px; display: grid; gap: 4px; }
+.muted { color: var(--muted); font-size: .9rem; }
+section { display: grid; gap: 8px; border: 2px solid var(--ink); border-radius: 4px; padding: 14px; }
+a.t { display: grid; grid-template-columns: 2.2em minmax(0, 1fr); gap: 8px; align-items: center; padding: 12px; border: 1px solid var(--ink);
+  border-radius: 4px; color: var(--ink); text-decoration: none; }
+a.t b { font-size: 1.2rem; }
+a.t code { font: .85rem ui-monospace, Menlo, monospace; color: var(--muted); overflow-wrap: anywhere; }
+a.t:active { background: var(--ink); color: var(--bg); }
+</style>
+</head>
+<body>
+<main>
+  <h1>RBC &amp; TD link test</h1>
+  <ol>
+    <li>Tap a button. It should open the bank app.</li>
+    <li>Note where it lands: <b>home</b>, <b>login then home</b>, <b>e-Transfer screen</b>, an <b>error</b>, or the <b>website</b> instead of the app.</li>
+    <li>Come back here and try the next one.</li>
+  </ol>
+  <p class="muted">Send back the numbers that reached the e-Transfer / Send Money screen, plus anything that opened the website instead of the app.</p>
+
+  <section>
+    <h2>RBC</h2>
+    <div id="rbc" style="display:grid;gap:8px"></div>
+  </section>
+  <section>
+    <h2>TD</h2>
+    <div id="td" style="display:grid;gap:8px"></div>
+  </section>
+</main>
+<script>
+(() => {
+  // RBC's app claims every path on mobile.rbcroyalbank.com; TD's claims /ul/mb/* on www.td.com.
+  const RBC = ["/", "/etransfer", "/interac-etransfer", "/send-money", "/movemoney", "/move-money/etransfer",
+    "/emt/send", "/interac/send", "/payments/etransfer/send", "/transfers/interac"]
+    .map(p => "https://mobile.rbcroyalbank.com" + p);
+  const TD = ["home", "etransfer", "interac", "interac-etransfer", "send-money", "sendmoney", "movemoney",
+    "transfers", "emt", "etransfer/send"]
+    .map(p => "https://www.td.com/ul/mb/" + p);
+  const draw = (id, list, prefix) => document.getElementById(id).innerHTML = list.map((u, i) =>
+    `<a class="t" href="${u}"><b>${prefix}${i + 1}</b><code>${u.replace(/^https:\/\//, "")}</code></a>`).join("");
+  draw("rbc", RBC, "R"); draw("td", TD, "T");
+})();
+</script>
+</body>
+</html>
