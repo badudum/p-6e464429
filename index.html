@@ -76,30 +76,21 @@ h2 { font: 800 1.15rem "Bricolage Grotesque", system-ui, sans-serif; margin: 0; 
   const btn = document.getElementById("copy");
   const p = new URLSearchParams(location.search);
   const amt = parseFloat(p.get("amt"));
-  // App ids checked against the Google Play and Apple App Store (Canada) listings.
+  // Links each bank's app has claimed (apple-app-site-association / assetlinks.json on the bank's own site),
+  // so the phone opens the app when it's installed. Banks without one only get the email copied.
   const BANKS = [
-    ["RBC", "com.rbc.mobile.android", 407597290], ["TD", "com.td", 358790776], ["CIBC", "com.cibc.android.mobi", 351448953],
-    ["Scotiabank", "com.scotiabank.banking", 341151570], ["BMO", "com.bmo.mobile", 429080319],
-    ["Tangerine", "ca.tangerine.clients.banking.app", 847844097], ["Wealthsimple", "com.wealthsimple.trade", 1403491709],
-    ["Vancity", "com.vancity.digital.banking", 6747142162], ["Coast Capital", "com.coastcapitalsavings.dcu", 1466597953],
-    ["National Bank", "ca.bnc.android", 476651878], ["Desjardins", "com.desjardins.mobile", 386636953],
-    ["EQ Bank", "com.eqbank.eqbank", 1039432211], ["KOHO", "ca.koho", 1091010942],
+    ["RBC", "https://mobile.rbcroyalbank.com/"], ["TD", "https://www.td.com/ul/mb/home"], ["CIBC", null],
+    ["Scotiabank", null], ["BMO", null], ["Tangerine", "https://www.tangerine.ca/deeplink"],
+    ["KOHO", "https://app.koho.ca/link"], ["Wealthsimple", null], ["Vancity", null], ["Coast Capital", null],
+    ["National Bank", null], ["Desjardins", null], ["EQ Bank", null],
   ];
   const ua = navigator.userAgent;
-  const android = /Android/i.test(ua);
-  const ios = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  const bankUrl = ([, pkg, appleId]) => {
-    if (android) {
-      const store = "https://play.google.com/store/apps/details?id=" + pkg;
-      return `intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=${pkg};S.browser_fallback_url=${encodeURIComponent(store)};end`;
-    }
-    return "https://apps.apple.com/ca/app/id" + appleId;
-  };
-  if (android || ios) {
-    const link = b => `<a href="${bankUrl(b)}" data-bank>${b[0]}</a>`;
-    document.getElementById("banks-top").innerHTML = BANKS.slice(0, 6).map(link).join("");
-    document.getElementById("banks-more").innerHTML = BANKS.slice(6).map(link).join("");
-    if (ios) document.getElementById("bank-note").textContent = "Tapping a bank copies the email and opens its App Store page. Tap Open there.";
+  const mobile = /Android|iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (mobile) {
+    const link = ([name, url], i) => url ? `<a href="${url}" data-bank="${i}">${name}</a>` : `<a href="#" data-bank="${i}">${name}</a>`;
+    document.getElementById("banks-top").innerHTML = BANKS.slice(0, 6).map((b, i) => link(b, i)).join("");
+    document.getElementById("banks-more").innerHTML = BANKS.slice(6).map((b, i) => link(b, i + 6)).join("");
+    document.getElementById("bank-note").textContent = "Tap your bank to copy the email. RBC, TD, Tangerine and KOHO open the app too.";
     document.getElementById("bank-sec").hidden = false;
   }
   if (isFinite(amt) && amt > 0 && amt < 10000) {
@@ -122,11 +113,16 @@ h2 { font: 800 1.15rem "Bricolage Grotesque", system-ui, sans-serif; margin: 0; 
     if (legacyCopy()) { done(); return; }
     selectEmail(); btn.textContent = "Press and hold the email to copy";
   });
-  document.addEventListener("click", async e => {
+  document.addEventListener("click", e => {
     const a = e.target.closest("a[data-bank]"); if (!a) return;
+    const [name, url] = BANKS[+a.dataset.bank];
+    // Copy synchronously so the tap can still follow the bank's link natively (iOS only opens apps from real taps).
+    let copied = legacyCopy();
+    if (!copied && navigator.clipboard) navigator.clipboard.writeText(EMAIL).then(done, () => {});
+    if (copied) done();
+    if (url) return;
     e.preventDefault();
-    try { await navigator.clipboard.writeText(EMAIL); done(); } catch { if (legacyCopy()) done(); }
-    location.href = a.href;
+    document.getElementById("bank-note").textContent = copied ? `Email copied. Now open your ${name} app and paste it.` : `Press and hold the email above to copy it, then open your ${name} app.`;
   });
   // Some browsers (mostly Android Chrome) allow copying right away; the rest need the tap.
   if (navigator.clipboard && document.hasFocus()) navigator.clipboard.writeText(EMAIL).then(done, () => {});
